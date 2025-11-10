@@ -27,7 +27,7 @@ Multi-tier web application infrastructure with:
 ## 📚 Components
 
 - [x] Project structure
-- [ ] VPC module
+- [x] VPC module
 - [ ] Security module
 - [ ] Compute module
 - [ ] Load Balancer module
