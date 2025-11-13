@@ -23,3 +23,29 @@ output "nat_gateway_id" {
   description = "The ID of the NAT Gateway"
   value       = module.vpc.nat_gateway_id
 }
+
+# Security Module Outputs
+output "alb_security_group_id" {
+  description = "ID of the ALB security group"
+  value       = module.security.alb_security_group_id
+}
+
+output "ec2_security_group_id" {
+  description = "ID of the EC2 security group"
+  value       = module.security.ec2_security_group_id
+}
+
+output "rds_security_group_id" {
+  description = "ID of the RDS security group"
+  value       = module.security.rds_security_group_id
+}
+
+output "ec2_instance_profile_name" {
+  description = "Name of the EC2 instance profile"
+  value       = module.security.ec2_instance_profile_name
+}
+
+output "ec2_iam_role_arn" {
+  description = "ARN of the EC2 IAM role"
+  value       = module.security.ec2_iam_role_arn
+}

@@ -28,7 +28,7 @@ Multi-tier web application infrastructure with:
 
 - [x] Project structure
 - [x] VPC module
-- [ ] Security module
+- [x] Security module
 - [ ] Compute module
 - [ ] Load Balancer module
 - [ ] Database module
