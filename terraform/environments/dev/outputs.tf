@@ -76,6 +76,38 @@ output "backend_target_group_arn" {
   value       = module.loadbalancer.backend_target_group_arn
 }
 
+# Database Module Outputs
+output "db_instance_endpoint" {
+  description = "Connection endpoint for the database (includes port)"
+  value       = module.database.db_instance_endpoint
+}
+
+output "db_instance_address" {
+  description = "Hostname of the database instance"
+  value       = module.database.db_instance_address
+}
+
+output "db_instance_name" {
+  description = "Name of the database"
+  value       = module.database.db_instance_name
+}
+
+output "db_instance_username" {
+  description = "Master username for the database"
+  value       = module.database.db_instance_username
+  sensitive   = true
+}
+
+output "db_password_secret_arn" {
+  description = "ARN of the Secrets Manager secret containing the database password"
+  value       = module.database.db_password_secret_arn
+}
+
+output "db_instance_port" {
+  description = "Port the database is listening on"
+  value       = module.database.db_instance_port
+}
+
 # Compute Module Outputs
 output "autoscaling_group_name" {
   description = "Name of the Auto Scaling Group"

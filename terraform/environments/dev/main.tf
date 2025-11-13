@@ -29,6 +29,15 @@ module "loadbalancer" {
   alb_security_group_id = module.security.alb_security_group_id
 }
 
+# Database Module
+module "database" {
+  source = "../../modules/database"
+
+  environment          = var.environment
+  private_subnet_ids   = module.vpc.private_subnet_ids
+  db_security_group_id = module.security.rds_security_group_id
+}
+
 # Compute Module
 module "compute" {
   source = "../../modules/compute"
