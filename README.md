@@ -29,8 +29,8 @@ Multi-tier web application infrastructure with:
 - [x] Project structure
 - [x] VPC module
 - [x] Security module
-- [ ] Compute module
-- [ ] Load Balancer module
+- [x] Compute module
+- [x] Load Balancer module
 - [ ] Database module
 - [ ] Docker containers
 - [ ] Ansible playbooks

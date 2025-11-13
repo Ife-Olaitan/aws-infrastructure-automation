@@ -50,6 +50,32 @@ output "ec2_iam_role_arn" {
   value       = module.security.ec2_iam_role_arn
 }
 
+# Load Balancer Module Outputs
+output "alb_dns_name" {
+  description = "DNS name of the Application Load Balancer - Use this URL to access your application"
+  value       = module.loadbalancer.alb_dns_name
+}
+
+output "alb_arn" {
+  description = "ARN of the Application Load Balancer"
+  value       = module.loadbalancer.alb_arn
+}
+
+output "alb_zone_id" {
+  description = "Zone ID of the Application Load Balancer"
+  value       = module.loadbalancer.alb_zone_id
+}
+
+output "frontend_target_group_arn" {
+  description = "ARN of the frontend target group"
+  value       = module.loadbalancer.frontend_target_group_arn
+}
+
+output "backend_target_group_arn" {
+  description = "ARN of the backend target group"
+  value       = module.loadbalancer.backend_target_group_arn
+}
+
 # Compute Module Outputs
 output "autoscaling_group_name" {
   description = "Name of the Auto Scaling Group"

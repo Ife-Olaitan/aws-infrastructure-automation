@@ -70,7 +70,6 @@ resource "aws_launch_template" "ec2_launch_template" {
     tags = {
       Name        = "${var.environment}-app-server"
       Environment = var.environment
-      ManagedBy   = "Terraform"
     }
   }
 
@@ -80,7 +79,6 @@ resource "aws_launch_template" "ec2_launch_template" {
     tags = {
       Name        = "${var.environment}-app-volume"
       Environment = var.environment
-      ManagedBy   = "Terraform"
     }
   }
 
@@ -92,7 +90,6 @@ resource "aws_launch_template" "ec2_launch_template" {
   tags = {
     Name        = "${var.environment}-app-launch-template"
     Environment = var.environment
-    ManagedBy   = "Terraform"
   }
 }
 
@@ -151,12 +148,6 @@ resource "aws_autoscaling_group" "app" {
   tag {
     key                 = "Environment"
     value               = var.environment
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "ManagedBy"
-    value               = "Terraform"
     propagate_at_launch = true
   }
 

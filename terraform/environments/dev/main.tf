@@ -19,6 +19,16 @@ module "security" {
   db_port                 = var.db_port
 }
 
+# Load Balancer Module
+module "loadbalancer" {
+  source = "../../modules/loadbalancer"
+
+  environment           = var.environment
+  vpc_id                = module.vpc.vpc_id
+  public_subnet_ids     = module.vpc.public_subnet_ids
+  alb_security_group_id = module.security.alb_security_group_id
+}
+
 # Compute Module
 module "compute" {
   source = "../../modules/compute"
@@ -29,7 +39,7 @@ module "compute" {
   security_group_id         = module.security.ec2_security_group_id
   iam_instance_profile_name = module.security.ec2_instance_profile_name
   private_subnet_ids        = module.vpc.private_subnet_ids
-  target_group_arns         = [] # Will be populated when load balancer module is added
+  target_group_arns         = module.loadbalancer.target_group_arns
   min_size                  = var.min_size
   max_size                  = var.max_size
   desired_capacity          = var.desired_capacity
