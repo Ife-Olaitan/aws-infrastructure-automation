@@ -18,3 +18,19 @@ module "security" {
   app_port                = var.app_port
   db_port                 = var.db_port
 }
+
+# Compute Module
+module "compute" {
+  source = "../../modules/compute"
+
+  environment               = var.environment
+  instance_type             = var.instance_type
+  key_name                  = var.key_name
+  security_group_id         = module.security.ec2_security_group_id
+  iam_instance_profile_name = module.security.ec2_instance_profile_name
+  private_subnet_ids        = module.vpc.private_subnet_ids
+  target_group_arns         = [] # Will be populated when load balancer module is added
+  min_size                  = var.min_size
+  max_size                  = var.max_size
+  desired_capacity          = var.desired_capacity
+}

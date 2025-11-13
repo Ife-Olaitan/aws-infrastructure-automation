@@ -49,3 +49,24 @@ output "ec2_iam_role_arn" {
   description = "ARN of the EC2 IAM role"
   value       = module.security.ec2_iam_role_arn
 }
+
+# Compute Module Outputs
+output "autoscaling_group_name" {
+  description = "Name of the Auto Scaling Group"
+  value       = module.compute.autoscaling_group_name
+}
+
+output "autoscaling_group_id" {
+  description = "ID of the Auto Scaling Group"
+  value       = module.compute.autoscaling_group_id
+}
+
+output "launch_template_id" {
+  description = "ID of the Launch Template"
+  value       = module.compute.launch_template_id
+}
+
+output "launch_template_version" {
+  description = "Latest version of the Launch Template"
+  value       = module.compute.launch_template_latest_version
+}
