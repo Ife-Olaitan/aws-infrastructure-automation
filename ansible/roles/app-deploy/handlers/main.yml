@@ -1,0 +1,16 @@
+---
+# Handlers for app-deploy role
+
+# Restart backend container
+- name: restart backend
+  ansible.builtin.command: docker restart {{ backend_container_name }}
+  tags:
+    - app-deploy
+    - backend
+
+# Restart frontend container
+- name: restart frontend
+  ansible.builtin.command: docker restart {{ frontend_container_name }}
+  tags:
+    - app-deploy
+    - frontend

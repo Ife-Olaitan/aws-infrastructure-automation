@@ -1,0 +1,5 @@
+---
+# Ansible Collections Required for This Project
+collections:
+  - name: community.general
+    version: ">=7.0.0"

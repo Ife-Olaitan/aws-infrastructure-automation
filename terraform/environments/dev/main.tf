@@ -8,6 +8,13 @@ module "vpc" {
   private_subnet_cidrs = var.private_subnet_cidrs
 }
 
+# ECR Module
+module "ecr" {
+  source = "../../modules/ecr"
+
+  environment = var.environment
+}
+
 # Security Module
 module "security" {
   source = "../../modules/security"
@@ -39,6 +46,22 @@ module "database" {
 }
 
 # Compute Module
+# NOTE: EC2 instances are deployed in PUBLIC subnets for this tutorial
+#
+# Why public subnets?
+# - Ansible needs direct SSH access to configure the instances
+# - Instances in private subnets can't receive inbound SSH, even with public IPs
+# - Private subnets only allow outbound traffic through NAT Gateway
+#
+# Security considerations:
+# - SSH is restricted to your IP only via Security Group (92.238.57.187/32)
+# - UFW firewall is configured by Ansible for additional protection
+# - Database remains in private subnets (no internet access)
+#
+# For production environments, consider:
+# - Option 1: Use a bastion host (jump server) in public subnet to access private instances
+# - Option 2: Use AWS Systems Manager Session Manager (no SSH or bastion needed)
+# - Option 3: Use GitHub Actions with self-hosted runners in private subnets
 module "compute" {
   source = "../../modules/compute"
 
@@ -47,7 +70,7 @@ module "compute" {
   key_name                  = var.key_name
   security_group_id         = module.security.ec2_security_group_id
   iam_instance_profile_name = module.security.ec2_instance_profile_name
-  private_subnet_ids        = module.vpc.private_subnet_ids
+  subnet_ids                = module.vpc.public_subnet_ids  # Using public subnets for Ansible SSH access
   target_group_arns         = module.loadbalancer.target_group_arns
   min_size                  = var.min_size
   max_size                  = var.max_size

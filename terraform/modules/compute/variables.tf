@@ -24,8 +24,8 @@ variable "iam_instance_profile_name" {
   type        = string
 }
 
-variable "private_subnet_ids" {
-  description = "List of private subnet IDs for EC2 instances"
+variable "subnet_ids" {
+  description = "List of subnet IDs for EC2 instances (public subnets for SSH access)"
   type        = list(string)
 }
 

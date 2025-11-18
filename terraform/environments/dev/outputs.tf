@@ -1,3 +1,9 @@
+# General Configuration Outputs
+output "aws_region" {
+  description = "The AWS region where resources are deployed"
+  value       = var.aws_region
+}
+
 # VPC Outputs
 output "vpc_id" {
   description = "The ID of the VPC"
@@ -22,6 +28,17 @@ output "internet_gateway_id" {
 output "nat_gateway_id" {
   description = "The ID of the NAT Gateway"
   value       = module.vpc.nat_gateway_id
+}
+
+# ECR Module Outputs
+output "backend_ecr_repository_url" {
+  description = "URL of the backend ECR repository"
+  value       = module.ecr.backend_repository_url
+}
+
+output "frontend_ecr_repository_url" {
+  description = "URL of the frontend ECR repository"
+  value       = module.ecr.frontend_repository_url
 }
 
 # Security Module Outputs

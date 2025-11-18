@@ -32,6 +32,6 @@ Multi-tier web application infrastructure with:
 - [x] Compute module
 - [x] Load Balancer module
 - [x] Database module
-- [ ] Docker containers
+- [x] Docker containers
 - [ ] Ansible playbooks
 - [ ] CI/CD pipeline

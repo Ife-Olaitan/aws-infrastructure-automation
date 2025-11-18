@@ -1,0 +1,105 @@
+---
+# Install firewall package
+- name: Install UFW firewall
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+    update_cache: yes
+  tags:
+    - security
+    - packages
+
+# Configure SSH - Disable password authentication (SSH keys only)
+- name: Disable SSH password authentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication '
+    line: "PasswordAuthentication no"
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  notify: restart ssh
+  tags:
+    - security
+    - ssh
+
+# Configure SSH - Disable root login
+- name: Disable SSH root login
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PermitRootLogin '
+    line: "PermitRootLogin no"
+    state: present
+    validate: '/usr/sbin/sshd -t -f %s'
+  notify: restart ssh
+  tags:
+    - security
+    - ssh
+
+# Set UFW default policies
+- name: Set UFW default incoming policy to deny
+  community.general.ufw:
+    direction: incoming
+    policy: deny
+  tags:
+    - security
+    - firewall
+
+- name: Set UFW default outgoing policy to allow
+  community.general.ufw:
+    direction: outgoing
+    policy: allow
+  tags:
+    - security
+    - firewall
+
+# Allow SSH
+- name: Allow SSH through firewall
+  community.general.ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+    comment: "SSH"
+  tags:
+    - security
+    - firewall
+
+# Allow HTTP
+- name: Allow HTTP through firewall
+  community.general.ufw:
+    rule: allow
+    port: "80"
+    proto: tcp
+    comment: "HTTP"
+  tags:
+    - security
+    - firewall
+
+# Allow HTTPS
+- name: Allow HTTPS through firewall
+  community.general.ufw:
+    rule: allow
+    port: "443"
+    proto: tcp
+    comment: "HTTPS"
+  tags:
+    - security
+    - firewall
+
+# Allow Backend API
+- name: Allow Backend API through firewall
+  community.general.ufw:
+    rule: allow
+    port: "3000"
+    proto: tcp
+    comment: "Backend API"
+  tags:
+    - security
+    - firewall
+
+# Enable UFW
+- name: Enable UFW firewall
+  community.general.ufw:
+    state: enabled
+  tags:
+    - security
+    - firewall

@@ -3,14 +3,13 @@ services:
   database:
     image: postgres:15.4-alpine
     container_name: aws-infra-database
-    environment:
-      POSTGRES_DB: appdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: localpassword
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
       # Persist database data
+      -
       - postgres_data:/var/lib/postgresql/data
       # Initialize database with users table
       - ./docker/database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -28,16 +27,8 @@ services:
       context: ./docker/backend
       dockerfile: Dockerfile
     container_name: aws-infra-backend
-    environment:
-      # Database connection
-      DB_HOST: database
-      DB_PORT: 5432
-      DB_NAME: appdb
-      DB_USER: postgres
-      DB_PASSWORD: localpassword
-      # Node environment
-      NODE_ENV: development
-      PORT: 3000
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     depends_on:

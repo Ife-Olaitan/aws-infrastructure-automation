@@ -1,0 +1,95 @@
+---
+# Tasks to install and configure Docker
+
+# Update package cache (like 'apt update')
+- name: Update apt package cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  tags:
+    - docker
+    - packages
+
+# Install required system packages
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: present
+  tags:
+    - docker
+    - packages
+
+# Install Docker and Docker Compose
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: yes
+  notify: restart docker
+  tags:
+    - docker
+    - packages
+
+# Ensure Docker service is started and enabled (starts on boot)
+- name: Ensure Docker service is running
+  ansible.builtin.systemd:
+    name: "{{ docker_service }}"
+    state: started
+    enabled: yes
+  tags:
+    - docker
+    - service
+
+# Add users to docker group (allows running docker without sudo)
+- name: Add users to docker group
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: docker
+    append: yes
+  loop: "{{ docker_users }}"
+  ignore_errors: yes
+  tags:
+    - docker
+    - users
+
+# Create Docker daemon config directory
+- name: Create Docker daemon config directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: directory
+    mode: '0755'
+  tags:
+    - docker
+    - config
+
+# Configure Docker daemon
+- name: Configure Docker daemon
+  ansible.builtin.copy:
+    content: "{{ docker_daemon_options | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+    mode: '0644'
+  notify: restart docker
+  tags:
+    - docker
+    - config
+
+# Verify Docker is working
+- name: Verify Docker installation
+  ansible.builtin.command: docker --version
+  register: docker_version
+  changed_when: false
+  tags:
+    - docker
+    - verify
+
+- name: Display Docker version
+  ansible.builtin.debug:
+    msg: "Docker installed: {{ docker_version.stdout }}"
+  tags:
+    - docker
+    - verify

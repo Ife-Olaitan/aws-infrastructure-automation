@@ -1,0 +1,127 @@
+---
+# Tasks to deploy application containers using Docker Compose
+
+# Install required packages
+- name: Install AWS CLI and Docker Compose
+  ansible.builtin.apt:
+    name:
+      - awscli
+      - docker-compose
+    state: present
+  tags:
+    - app-deploy
+    - packages
+
+# Create application directory
+- name: Create application directory
+  ansible.builtin.file:
+    path: /opt/app
+    state: directory
+    mode: '0755'
+    owner: ubuntu
+    group: ubuntu
+  tags:
+    - app-deploy
+    - setup
+
+# Fetch database password from AWS Secrets Manager
+- name: Fetch database password from Secrets Manager
+  ansible.builtin.command: >
+    aws secretsmanager get-secret-value
+    --secret-id {{ db_secret_name }}
+    --query SecretString
+    --output text
+  register: db_password_result
+  changed_when: false
+  tags:
+    - app-deploy
+    - secrets
+
+# Set database password as fact
+- name: Set database password variable
+  ansible.builtin.set_fact:
+    db_password: "{{ db_password_result.stdout }}"
+  tags:
+    - app-deploy
+    - secrets
+
+# Deploy docker-compose.yml from template
+- name: Deploy docker-compose.yml
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: /opt/app/docker-compose.yml
+    mode: '0644'
+    owner: ubuntu
+    group: ubuntu
+  tags:
+    - app-deploy
+    - config
+
+# Deploy .env file from template
+- name: Deploy .env file with credentials
+  ansible.builtin.template:
+    src: .env.j2
+    dest: /opt/app/.env
+    mode: '0600'
+    owner: ubuntu
+    group: ubuntu
+  tags:
+    - app-deploy
+    - config
+    - secrets
+
+# Pull Docker images
+- name: Pull Docker images
+  ansible.builtin.command: docker-compose pull
+  args:
+    chdir: /opt/app
+  when: not docker_build_enabled
+  tags:
+    - app-deploy
+    - images
+
+# Stop existing containers
+- name: Stop existing containers
+  ansible.builtin.command: docker-compose down
+  args:
+    chdir: /opt/app
+  ignore_errors: yes
+  tags:
+    - app-deploy
+    - deploy
+
+# Start containers with docker-compose
+- name: Start application containers
+  ansible.builtin.command: docker-compose up -d
+  args:
+    chdir: /opt/app
+  tags:
+    - app-deploy
+    - deploy
+
+# Wait for containers to be healthy
+- name: Wait for containers to be healthy
+  ansible.builtin.pause:
+    seconds: 10
+  tags:
+    - app-deploy
+    - verify
+
+# Verify containers are running
+- name: Check container status
+  ansible.builtin.command: docker-compose ps
+  args:
+    chdir: /opt/app
+  register: container_status
+  changed_when: false
+  tags:
+    - app-deploy
+    - verify
+
+# Display container status
+- name: Display container status
+  ansible.builtin.debug:
+    msg: "{{ container_status.stdout_lines }}"
+  tags:
+    - app-deploy
+    - verify

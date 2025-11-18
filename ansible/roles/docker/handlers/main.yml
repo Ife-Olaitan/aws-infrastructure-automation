@@ -1,0 +1,12 @@
+---
+# Handlers are triggered by 'notify' in tasks
+# They only run if something changed
+
+# Restart Docker service
+- name: restart docker
+  ansible.builtin.systemd:
+    name: "{{ docker_service }}"
+    state: restarted
+  tags:
+    - docker
+    - service

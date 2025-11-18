@@ -1,0 +1,42 @@
+---
+# Main deployment playbook
+- name: Deploy application to EC2 instances
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  pre_tasks:
+    # Update package cache before installing anything
+    - name: Update apt package cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+  roles:
+    # 1. Install Docker
+    - role: docker
+
+    # 2. Configure basic security
+    - role: security
+
+    # 3. Setup CloudWatch monitoring
+    - role: monitoring
+
+    # 4. Deploy application
+    - role: app-deploy
+
+  post_tasks:
+    # Verify application is running
+    - name: Verify backend health
+      ansible.builtin.uri:
+        url: "http://localhost:3000/health"
+        status_code: 200
+      retries: 10
+      delay: 5
+
+    - name: Verify frontend health
+      ansible.builtin.uri:
+        url: "http://localhost:80/health"
+        status_code: 200
+      retries: 10
+      delay: 5

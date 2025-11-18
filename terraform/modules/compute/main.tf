@@ -38,7 +38,9 @@ resource "aws_launch_template" "ec2_launch_template" {
 
   # Network Configuration
   network_interfaces {
-    associate_public_ip_address = false
+    # Enabling public IP for Ansible SSH access
+    # For production, use a bastion host or AWS Systems Manager instead
+    associate_public_ip_address = true
     security_groups             = [var.security_group_id]
     delete_on_termination       = true
   }
@@ -104,7 +106,7 @@ resource "aws_autoscaling_group" "app" {
   }
 
   # Network Configuration
-  vpc_zone_identifier = var.private_subnet_ids
+  vpc_zone_identifier = var.subnet_ids
 
   # Capacity Configuration
   min_size         = var.min_size
@@ -112,7 +114,9 @@ resource "aws_autoscaling_group" "app" {
   desired_capacity = var.desired_capacity
 
   # Health Check Configuration
-  health_check_type         = "ELB"
+  # Using EC2 health checks initially to allow app deployment
+  # Change to "ELB" after initial deployment for application-level health checks
+  health_check_type         = "EC2"
   health_check_grace_period = 300
 
   # Load Balancer Configuration
