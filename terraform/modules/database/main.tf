@@ -24,8 +24,9 @@ resource "aws_db_subnet_group" "main" {
 
 # Random Password - Generates a secure password for the database master user
 resource "random_password" "master_password" {
-  length  = 16
-  special = true
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}:?" # Exclude /, @, ", and space which RDS doesn't allow
 }
 
 # Secrets Manager Secret - Stores the database password securely

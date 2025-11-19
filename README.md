@@ -2,16 +2,16 @@
 
 Production-ready AWS infrastructure deployment using Terraform, Ansible, and Docker.
 
-## 🏗️ Architecture
+## Architecture
 
 Multi-tier web application infrastructure with:
 - VPC with public/private subnets across 2 AZs
 - Application Load Balancer with path-based routing
-- Auto Scaling Group (2-4 EC2 instances)
-- RDS PostgreSQL database (Multi-AZ)
+- Auto Scaling Group (2-4 EC2 instances across multiple AZs)
+- RDS PostgreSQL database (single-AZ for cost optimization)
 - Docker containerized applications (Node.js + Nginx)
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # 1. Setup Terraform backend
@@ -24,12 +24,12 @@ Multi-tier web application infrastructure with:
 # ALB DNS will be displayed after deployment
 ```
 
-## 📚 Documentation
+## Documentation
 
 - **[Architecture](docs/architecture.md)** - Detailed system design and components
 - **[Deployment Guide](docs/deployment.md)** - Step-by-step deployment instructions
 
-## 🛠️ Technologies
+## Technologies
 
 - **Cloud**: AWS (VPC, EC2, RDS, ALB, IAM, ECR, Secrets Manager)
 - **IaC**: Terraform
@@ -39,7 +39,7 @@ Multi-tier web application infrastructure with:
 - **Web Server**: Nginx
 - **Backend**: Node.js + Express
 
-## ✅ Features
+## Features
 
 - ✅ Multi-AZ deployment for high availability
 - ✅ Auto-scaling based on CPU metrics
@@ -73,7 +73,7 @@ Multi-tier web application infrastructure with:
 └── docs/                # Documentation
 ```
 
-## 🎯 Use Cases
+## Use Cases
 
 This project demonstrates:
 - Production-grade AWS infrastructure deployment
@@ -84,21 +84,7 @@ This project demonstrates:
 - High availability and fault tolerance
 - Auto-scaling and load balancing
 
-## 💰 Cost Estimate
-
-**Dev Environment:** ~$110/month
-- EC2: 2 × t3.micro (~$15)
-- RDS: db.t3.micro Multi-AZ (~$25)
-- ALB (~$20)
-- NAT Gateway (~$35)
-- Storage and Data Transfer (~$15)
-
-**Cost Optimization:**
-- Destroy when not in use: `./scripts/destroy.sh`
-- Use single NAT Gateway (implemented)
-- Stop instances during off-hours
-
-## 🚧 Development Status
+## Development Status
 
 - [x] VPC module with multi-AZ architecture
 - [x] Security module (IAM, Security Groups)
@@ -110,7 +96,7 @@ This project demonstrates:
 - [x] Deployment automation scripts
 - [x] Complete documentation
 
-## 🤝 Contributing
+## Contributing
 
 This is a portfolio project. Feel free to fork and customize for your needs.
 

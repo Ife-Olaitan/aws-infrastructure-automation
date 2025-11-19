@@ -142,8 +142,8 @@ This project implements a production-grade, highly available web application inf
 - **Engine**: PostgreSQL 14.x
 - **Instance Class**: `db.t3.micro` (dev), `db.t3.small` (prod)
 - **Storage**: 20GB GP3
-- **Multi-AZ**: Enabled for high availability
-- **Backup**: 7-day retention
+- **Multi-AZ**: Disabled (single-AZ deployment for cost savings)
+- **Backup**: 7-day automated backup retention
 - **Encryption**: At rest and in transit (SSL/TLS)
 - **Network**: Private subnets only
 - **Port**: 5432
@@ -241,22 +241,23 @@ Allows EC2 instances to:
 ## High Availability
 
 ### Multi-AZ Deployment
-- Resources distributed across 2 availability zones
-- ALB distributes traffic across both AZs
-- RDS automatic failover to standby in different AZ
-- Auto Scaling replaces failed instances automatically
+- **Application Tier**: Distributed across 2 availability zones (eu-west-2a, eu-west-2b)
+- **ALB**: Distributes traffic across both AZs
+- **ASG**: Launches instances across multiple AZs (when scaled to 2+ instances)
+- **Database**: Single-AZ deployment (cost optimization for dev environment)
 
 ### Fault Tolerance
 - **ALB**: Automatic health checks remove unhealthy targets
-- **ASG**: Replaces failed instances based on health checks
-- **RDS**: Multi-AZ with automatic failover (<60 seconds)
+- **ASG**: Replaces failed instances automatically based on health checks
+- **Application**: Multi-instance deployment (2+ instances) provides redundancy
 - **Data**: Daily automated backups with 7-day retention
 
 ### Disaster Recovery
-- **RTO** (Recovery Time Objective): ~10 minutes
-- **RPO** (Recovery Point Objective): 5 minutes (automated backups)
-- **Backup**: Daily snapshots, cross-region copy optional
-- **Restore**: Launch new RDS instance from snapshot
+- **RTO** (Recovery Time Objective): ~15-20 minutes (restore from backup)
+- **RPO** (Recovery Point Objective): Up to 24 hours (daily automated backups)
+- **Backup**: Daily automated snapshots at 03:00-04:00 UTC
+- **Restore**: Launch new RDS instance from latest snapshot
+- **Note**: For production, enable Multi-AZ for faster failover (<60 seconds)
 
 ## Scalability
 
@@ -291,15 +292,6 @@ Allows EC2 instances to:
 - Access logs: ALB access logs to S3
 - System logs: CloudWatch Logs agent
 - Database logs: RDS logs in CloudWatch
-
-## Cost Optimization
-
-### Cost Saving Strategies
-- Use EC2 health checks instead of ELB (implemented)
-- Single NAT Gateway instead of per-AZ
-- Stop dev environment during off-hours
-- Reserved Instances for production
-- S3 lifecycle policies for old backups
 
 ## Infrastructure as Code
 
