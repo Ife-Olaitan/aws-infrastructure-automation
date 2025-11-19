@@ -29,6 +29,7 @@
   ansible.builtin.command: >
     aws secretsmanager get-secret-value
     --secret-id {{ db_secret_name }}
+    --region {{ aws_region }}
     --query SecretString
     --output text
   register: db_password_result
@@ -69,6 +70,17 @@
     - app-deploy
     - config
     - secrets
+
+# Login to ECR
+- name: Get ECR login password and authenticate Docker
+  ansible.builtin.shell: |
+    aws ecr get-login-password --region {{ aws_region }} | docker login --username AWS --password-stdin {{ backend_image.split(':')[0].split('/')[0] }}
+  args:
+    executable: /bin/bash
+  changed_when: false
+  tags:
+    - app-deploy
+    - images
 
 # Pull Docker images
 - name: Pull Docker images

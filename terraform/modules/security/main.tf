@@ -55,11 +55,20 @@ resource "aws_security_group" "ec2" {
   description = "Security group for EC2 application servers"
   vpc_id      = var.vpc_id
 
-  # Inbound from ALB only
+  # Inbound from ALB - Frontend (port 80)
   ingress {
-    description     = "Application traffic from ALB"
-    from_port       = var.app_port
-    to_port         = var.app_port
+    description     = "Frontend traffic from ALB"
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  # Inbound from ALB - Backend (port 3000)
+  ingress {
+    description     = "Backend API traffic from ALB"
+    from_port       = 3000
+    to_port         = 3000
     protocol        = "tcp"
     security_groups = [aws_security_group.alb.id]
   }
@@ -198,6 +207,30 @@ resource "aws_iam_policy" "ecr_access" {
   }
 }
 
+# Secrets Manager Policy - Allows EC2 to read database credentials
+resource "aws_iam_policy" "secrets_manager" {
+  name        = "${var.environment}-ec2-secrets-manager-policy"
+  description = "Allows EC2 instances to read secrets from Secrets Manager"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = "arn:aws:secretsmanager:*:*:secret:${var.environment}-*"
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.environment}-secrets-manager-policy"
+  }
+}
+
 # ============================================================================
 # ATTACH POLICIES TO ROLE
 # ============================================================================
@@ -212,6 +245,12 @@ resource "aws_iam_role_policy_attachment" "cloudwatch_logs" {
 resource "aws_iam_role_policy_attachment" "ecr_access" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.ecr_access.arn
+}
+
+# Attach Secrets Manager policy to role
+resource "aws_iam_role_policy_attachment" "secrets_manager" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.secrets_manager.arn
 }
 
 # Attach AWS managed SSM policy (for Systems Manager Session Manager - SSH alternative)

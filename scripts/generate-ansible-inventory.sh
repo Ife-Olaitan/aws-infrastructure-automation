@@ -42,6 +42,8 @@ EC2_IPS=$(aws ec2 describe-instances \
 
 # Get database outputs
 RDS_ENDPOINT=$(terraform output -raw db_instance_endpoint 2>/dev/null)
+DB_HOST=$(echo "$RDS_ENDPOINT" | cut -d':' -f1)  # Strip port from endpoint
+DB_PORT=$(terraform output -raw db_instance_port 2>/dev/null)
 DB_NAME=$(terraform output -raw db_instance_name 2>/dev/null)
 DB_USERNAME=$(terraform output -raw db_instance_username 2>/dev/null)
 DB_SECRET_ARN=$(terraform output -raw db_password_secret_arn 2>/dev/null)
@@ -58,7 +60,7 @@ if [ -z "$EC2_IPS" ]; then
 fi
 
 # Check if we got RDS endpoint
-if [ -z "$RDS_ENDPOINT" ]; then
+if [ -z "$DB_HOST" ]; then
     print_error "Could not get RDS endpoint from Terraform"
     exit 1
 fi
@@ -100,7 +102,8 @@ cat >> "$INVENTORY_FILE" <<EOF
         ansible_ssh_private_key_file: ~/.ssh/id_rsa
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
         aws_region: $AWS_REGION
-        db_host: $RDS_ENDPOINT
+        db_host: $DB_HOST
+        db_port: $DB_PORT
         db_name: $DB_NAME
         db_username: $DB_USERNAME
         db_secret_name: $DB_SECRET_NAME

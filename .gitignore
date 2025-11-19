@@ -20,3 +20,6 @@
 
 # OS
 .DS_Store
+
+# Auto-generated Ansible inventory
+ansible/inventory/hosts.yml

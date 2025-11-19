@@ -52,7 +52,7 @@ if [ ! -f "Dockerfile" ]; then
     exit 1
 fi
 
-docker build -t backend:latest . >/dev/null 2>&1
+docker build --platform linux/amd64 -t backend:latest . >/dev/null 2>&1
 docker tag backend:latest "$BACKEND_ECR:latest"
 docker push "$BACKEND_ECR:latest" >/dev/null 2>&1
 print_success "Backend image pushed to ECR"
@@ -66,7 +66,7 @@ if [ ! -f "Dockerfile" ]; then
     exit 1
 fi
 
-docker build -t frontend:latest . >/dev/null 2>&1
+docker build --platform linux/amd64 -t frontend:latest . >/dev/null 2>&1
 docker tag frontend:latest "$FRONTEND_ECR:latest"
 docker push "$FRONTEND_ECR:latest" >/dev/null 2>&1
 print_success "Frontend image pushed to ECR"

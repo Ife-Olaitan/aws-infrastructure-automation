@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const initializeDatabase = require('./init-db');
 require('dotenv').config();
 
 const app = express();
@@ -16,6 +17,10 @@ const pool = new Pool({
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
+    // SSL configuration for RDS
+    ssl: {
+        rejectUnauthorized: false  // Required for RDS connections
+    }
 });
 
 // Middleware
@@ -120,12 +125,26 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start server
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Backend server running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
-    console.log(`Database: ${process.env.DB_HOST || 'database'}:${process.env.DB_PORT || 5432}`);
-});
+// Initialize database and start server
+async function startServer() {
+    try {
+        // Initialize database schema
+        await initializeDatabase();
+
+        // Start server
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`✅ Backend server running on port ${PORT}`);
+            console.log(`Environment: ${process.env.NODE_ENV || 'production'}`);
+            console.log(`Database: ${process.env.DB_HOST || 'database'}:${process.env.DB_PORT || 5432}`);
+        });
+    } catch (error) {
+        console.error('❌ Failed to start server:', error);
+        process.exit(1);
+    }
+}
+
+// Start the server
+startServer();
 
 // Graceful shutdown
 process.on('SIGTERM', () => {
