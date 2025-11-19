@@ -281,20 +281,22 @@ cd ansible
 ansible webservers -i inventory/hosts.yml -m ping
 
 # Deploy application
-ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml
+ansible-playbook -i inventory/hosts.yml playbooks/deploy.yml
 
 # Use -v for verbose output if needed
-ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml -v
+ansible-playbook -i inventory/hosts.yml playbooks/deploy.yml -v
 ```
 
 **What Ansible does:**
 1. Installs Docker (if not already installed from user-data)
-2. Authenticates with ECR
-3. Pulls Docker images
-4. Fetches database password from Secrets Manager
-5. Creates environment configuration
-6. Starts frontend and backend containers
-7. Verifies containers are running
+2. Configures security (UFW firewall, SSH hardening)
+3. Installs and configures CloudWatch agent
+4. Authenticates with ECR
+5. Pulls Docker images
+6. Fetches database password from Secrets Manager
+7. Creates environment configuration
+8. Starts frontend and backend containers
+9. Verifies containers are running and healthy
 
 ---
 
@@ -557,16 +559,15 @@ When you only change application code (not infrastructure):
 # 1. Build and push new images
 ./scripts/build-and-push-to-ecr.sh
 
-# 2. Update containers on EC2 instances
+# 2. Redeploy containers on EC2 instances
 cd ansible
-ansible-playbook -i inventory/hosts.yml playbooks/update-containers.yml
+ansible-playbook -i inventory/hosts.yml playbooks/deploy.yml
 ```
 
-**This playbook:**
-- Pulls latest images from ECR
-- Stops old containers
-- Starts new containers
-- Zero downtime (rolling updates)
+**This will:**
+- Pull latest images from ECR
+- Restart containers with new images
+- Verify health checks
 
 ---
 
@@ -589,7 +590,7 @@ cd ../../..
 
 # Redeploy application if needed
 cd ansible
-ansible-playbook -i inventory/hosts.yml playbooks/deploy-app.yml
+ansible-playbook -i inventory/hosts.yml playbooks/deploy.yml
 ```
 
 ---
@@ -721,7 +722,7 @@ aws autoscaling describe-auto-scaling-groups
 # Ansible commands
 ansible webservers -i inventory/hosts.yml -m ping
 ansible webservers -i inventory/hosts.yml -a "uptime"
-ansible-playbook --syntax-check playbooks/deploy-app.yml
+ansible-playbook --syntax-check playbooks/deploy.yml
 
 # Docker commands on EC2
 sudo docker ps

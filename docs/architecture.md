@@ -86,9 +86,10 @@ This project implements a production-grade, highly available web application inf
 ### EC2 Instances
 - **AMI**: Ubuntu 22.04 LTS
 - **Instance Type**: `t3.micro` (dev), `t3.small` (prod)
-- **Storage**: 20GB GP3 EBS
-- **User Data**: Docker installation, CloudWatch agent
+- **Storage**: 20GB GP3 EBS (encrypted)
+- **User Data**: Docker and Docker Compose installation
 - **IAM Role**: EC2 role with Secrets Manager and ECR access
+- **Configuration**: Ansible installs CloudWatch agent, security hardening
 
 ### Auto Scaling Policies
 
@@ -272,11 +273,12 @@ Allows EC2 instances to:
 
 ## Monitoring and Observability
 
-### CloudWatch Metrics (Future)
-- EC2: CPU, memory, disk, network
-- ALB: Request count, latency, HTTP codes
-- RDS: CPU, connections, storage, IOPS
-- Auto Scaling: Group size, scaling activities
+### CloudWatch Metrics (Implemented)
+- **EC2 Custom Metrics** (via CloudWatch agent):
+  - CPU usage
+  - Memory usage
+  - Disk usage
+- **Future additions**: ALB metrics, RDS metrics, Auto Scaling events
 
 ### Health Checks
 - **ALB → Frontend**: HTTP GET `/` (port 80)
@@ -291,15 +293,6 @@ Allows EC2 instances to:
 - Database logs: RDS logs in CloudWatch
 
 ## Cost Optimization
-
-### Current Monthly Estimate (Dev Environment)
-- **EC2**: 2 × t3.micro × 730 hours = ~$15
-- **RDS**: db.t3.micro Multi-AZ × 730 hours = ~$25
-- **ALB**: 1 × 730 hours + data transfer = ~$20
-- **Data Transfer**: Minimal for dev = ~$5
-- **NAT Gateway**: 1 × 730 hours + data = ~$35
-- **Storage**: EBS + RDS storage = ~$10
-- **Total**: ~$110/month
 
 ### Cost Saving Strategies
 - Use EC2 health checks instead of ELB (implemented)
@@ -351,19 +344,18 @@ Allows EC2 instances to:
 ### Ansible Structure
 
 #### Inventory
-- Auto-generated from Terraform outputs
-- Includes EC2 IPs, RDS endpoint, ECR URLs
+- Auto-generated from Terraform outputs by `scripts/generate-ansible-inventory.sh`
+- Includes EC2 IPs, RDS endpoint, ECR URLs, AWS region
 - Grouped by role (webservers)
 
 #### Playbooks
-- `deploy-app.yml`: Full application deployment
-- `update-containers.yml`: Rolling updates
-- `healthcheck.yml`: Verification
+- `deploy.yml`: Full application deployment
 
 #### Roles
-- `common`: Base system configuration
-- `docker`: Docker and Docker Compose setup
-- `app-deploy`: Pull images, start containers
+- `docker`: Docker installation and configuration
+- `security`: Security hardening (UFW firewall, SSH hardening)
+- `monitoring`: CloudWatch agent for metrics collection (CPU, memory, disk)
+- `app-deploy`: ECR authentication, pull images, start containers
 
 ## Security Best Practices
 
@@ -375,50 +367,6 @@ Allows EC2 instances to:
 - ✅ Secrets in Secrets Manager (not code)
 - ✅ VPC isolation
 - ✅ Multi-AZ for resilience
-
-### Recommended Additions
-- [ ] AWS WAF on ALB
-- [ ] GuardDuty for threat detection
-- [ ] CloudTrail for audit logs
-- [ ] Secrets rotation automation
-- [ ] SSL/TLS for ALB (HTTPS)
-- [ ] VPC Flow Logs
-- [ ] Systems Manager Session Manager (instead of SSH)
-
-## Maintenance and Operations
-
-### Regular Tasks
-- **Weekly**: Review CloudWatch metrics and alarms
-- **Monthly**: Review and update AMI versions
-- **Quarterly**: Disaster recovery testing
-- **Annually**: Security audit and penetration testing
-
-### Runbooks
-- Deploy new version: Run Ansible playbook
-- Scale manually: Update ASG desired capacity
-- Database failover: Automatic (Multi-AZ)
-- Rollback: Deploy previous ECR image tag
-
-## Future Enhancements
-
-### Short Term
-- [ ] Add SSL/TLS certificate to ALB
-- [ ] Implement CloudWatch dashboards
-- [ ] Add application performance monitoring
-- [ ] Setup automated backups verification
-
-### Long Term
-- [ ] Multi-region deployment
-- [ ] Blue/green deployments
-- [ ] Canary releases
-- [ ] Service mesh (Istio/App Mesh)
-- [ ] Kubernetes migration (EKS)
-
-## Interview Talking Points
-
-When discussing this architecture:
-
-> "I designed and implemented a highly available, multi-tier web application infrastructure on AWS using Infrastructure as Code principles. The architecture uses Terraform modules for provisioning, includes multi-AZ deployment for fault tolerance, and implements auto-scaling based on CPU metrics. Security is enforced through VPC isolation, security groups, IAM roles with least privilege, and encrypted database connections. The entire deployment is automated using shell scripts and Ansible for consistent, repeatable deployments."
 
 **Key Technical Achievements:**
 - Multi-AZ high availability architecture
