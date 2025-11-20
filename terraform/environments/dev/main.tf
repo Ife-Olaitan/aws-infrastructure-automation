@@ -46,22 +46,6 @@ module "database" {
 }
 
 # Compute Module
-# NOTE: EC2 instances are deployed in PUBLIC subnets for this tutorial
-#
-# Why public subnets?
-# - Ansible needs direct SSH access to configure the instances
-# - Instances in private subnets can't receive inbound SSH, even with public IPs
-# - Private subnets only allow outbound traffic through NAT Gateway
-#
-# Security considerations:
-# - SSH is restricted to your IP only via Security Group (92.238.57.187/32)
-# - UFW firewall is configured by Ansible for additional protection
-# - Database remains in private subnets (no internet access)
-#
-# For production environments, consider:
-# - Option 1: Use a bastion host (jump server) in public subnet to access private instances
-# - Option 2: Use AWS Systems Manager Session Manager (no SSH or bastion needed)
-# - Option 3: Use GitHub Actions with self-hosted runners in private subnets
 module "compute" {
   source = "../../modules/compute"
 
